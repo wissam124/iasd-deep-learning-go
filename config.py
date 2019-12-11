@@ -12,22 +12,22 @@ HIDDEN_CNN_LAYERS = [{
 
 
 HIDDEN_CNN_LAYERS = [{
-    'numFilters': 72,
+    'numFilters': 64,
     'kernelSize': (3, 3)
 }, {
-    'numFilters': 72,
+    'numFilters': 64,
     'kernelSize': (3, 3)
 }, {
-    'numFilters': 72,
+    'numFilters': 64,
     'kernelSize': (3, 3)
 }, {
-    'numFilters': 72,
+    'numFilters': 64,
     'kernelSize': (3, 3)
 }, {
-    'numFilters': 72,
+    'numFilters': 64,
     'kernelSize': (3, 3)
 }, {
-    'numFilters': 72,
+    'numFilters': 64,
     'kernelSize': (3, 3)
 }]
 
