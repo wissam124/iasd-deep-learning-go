@@ -32,11 +32,11 @@ else:
     value = np.load('./value.npy')
     end = np.load('./end.npy')
 
-GoNeuralNet = NeuralNet(config.REG_CONST, config.LEARNING_RATE,
-                        (19, 19, planes), moves, config.HIDDEN_CNN_LAYERS,
-                        config.MOMENTUM)
+# GoNeuralNet = NeuralNet(config.REG_CONST, config.LEARNING_RATE,
+#                         (19, 19, planes), moves, config.HIDDEN_CNN_LAYERS,
+#                         config.MOMENTUM)
 
-GoNeuralNet.summary()
+# GoNeuralNet.summary()
 
 # GoNeuralNet.fit(input_data, {
 #     'policy': policy,
