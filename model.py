@@ -26,9 +26,7 @@ class GoModel():
                                      mode='auto',
                                      period=1)
 
-        csv_logger = CSVLogger('training.log',
-                               separator=',',
-                               append=False)
+        csv_logger = CSVLogger('training.log', separator=',', append=False)
 
         return self.model.fit(X,
                               y,
@@ -99,66 +97,48 @@ class NeuralNet(GoModel):
 
     def value_head(self, x):
 
-        # x = Conv2D(
-        #     filters=1,
-        #     kernel_size=1,  # (1,1)?
-        #     data_format='channels_last',
-        #     padding='same',
-        #     use_bias=False,
-        #     activation='linear',
-        #     kernel_regularizer=regularizers.l2(self.regParam))(x)
+        x = Conv2D(filters=1,
+                   kernel_size=(1, 1),
+                   data_format='channels_last',
+                   padding='same',
+                   use_bias=False,
+                   activation='linear',
+                   kernel_regularizer=regularizers.l2(self.regParam))(x)
 
-        # x = BatchNormalization(axis=-1)(x)
+        x = BatchNormalization(axis=-1)(x)
 
-        # x = LeakyReLU()(x)
-
-        # x = Flatten()(x)
-
-        # x = Dense(20,
-        #           use_bias=False,
-        #           activation='linear',
-        #           kernel_regularizer=regularizers.l2(self.regParam))(x)
-
-        # x = LeakyReLU()(x)
-
-        # x = Dense(1,
-        #           use_bias=False,
-        #           activation='sigmoid',
-        #           kernel_regularizer=regularizers.l2(self.regParam),
-        #           name='value')(x)
+        x = LeakyReLU()(x)
 
         x = Flatten()(x)
 
-        x = Dense(1, activation='sigmoid', name='value')(x)
+        x = Dense(10,
+                  use_bias=False,
+                  activation='linear',
+                  kernel_regularizer=regularizers.l2(self.regParam))(x)
+
+        x = LeakyReLU()(x)
+
+        x = Dense(1,
+                  use_bias=False,
+                  activation='sigmoid',
+                  kernel_regularizer=regularizers.l2(self.regParam),
+                  name='value')(x)
 
         return (x)
 
     def policy_head(self, x):
-        # x = Conv2D(filters=1,
-        #            kernel_size=(1, 1),
-        #            data_format='channels_last',
-        #            padding='same',
-        #            use_bias=False,
-        #            activation='linear',
-        #            kernel_regularizer=regularizers.l2(self.regParam))(x)
 
-        # x = BatchNormalization(axis=-1)(x)
-
-        # x = LeakyReLU()(x)
-
-        # x = Flatten()(x)
-
-        # x = Dense(self.outputDim,
-        #           use_bias=False,
-        #           activation='linear',
-        #           kernel_regularizer=regularizers.l2(self.regParam),
-        #           name='policy')(x)
-
-        x = Conv2D(filters=1,
-                   kernel_size=(3, 3),
+        x = Conv2D(filters=2,
+                   kernel_size=(1, 1),
                    data_format='channels_last',
                    padding='same',
-                   activation='relu')(x)
+                   use_bias=False,
+                   activation='linear',
+                   kernel_regularizer=regularizers.l2(self.regParam))(x)
+
+        x = BatchNormalization(axis=-1)(x)
+
+        x = LeakyReLU()(x)
 
         x = Flatten()(x)
 
@@ -168,9 +148,9 @@ class NeuralNet(GoModel):
 
     def buildModel(self):
 
-        input = Input(shape=self.inputDim, name='board')
+        mainInput = Input(shape=self.inputDim, name='board')
 
-        x = self.convLayer(input, self.hidden_layers[0]['numFilters'],
+        x = self.convLayer(mainInput, self.hidden_layers[0]['numFilters'],
                            self.hidden_layers[0]['kernelSize'])
 
         if len(self.hidden_layers) > 1:
@@ -180,7 +160,7 @@ class NeuralNet(GoModel):
         value_head = self.value_head(x)
         policy_head = self.policy_head(x)
 
-        model = Model(inputs=[input], outputs=[policy_head, value_head])
+        model = Model(inputs=[mainInput], outputs=[policy_head, value_head])
         model.compile(optimizer=SGD(lr=self.learningRate),
                       loss={
                           'value': 'mse',
