@@ -10,7 +10,7 @@ from model import NeuralNet
 
 planes = 8
 moves = 361
-dynamicBatch = False  # pour tester réseau sans installer la bibli golois
+dynamicBatch = True  # pour tester réseau sans installer la bibli golois
 if dynamicBatch:
     N = 100000
     input_data = np.random.randint(2, size=(N, 19, 19, planes))
@@ -32,21 +32,22 @@ else:
     value = np.load('./value.npy')
     end = np.load('./end.npy')
 
-# GoNeuralNet = NeuralNet(config.REG_CONST, config.LEARNING_RATE,
-#                         (19, 19, planes), moves, config.HIDDEN_CNN_LAYERS,
-#                         config.MOMENTUM)
+GoNeuralNet = NeuralNet(config.REG_CONST, config.LEARNING_RATE,
+                        (19, 19, planes), moves, config.HIDDEN_CNN_LAYERS,
+                        config.MOMENTUM)
 
-# GoNeuralNet.summary()
+GoNeuralNet.summary()
 
-# GoNeuralNet.fit(input_data, {
-#     'policy': policy,
-#     'value': value
-# },
-#                 epochs=config.EPOCHS,
-#                 verbose=1,
-#                 validation_split=0.1,
-#                 batch_size=config.BATCH_SIZE)
+GoNeuralNet.fit(input_data, {
+    'policy': policy,
+    'value': value
+},
+                epochs=config.EPOCHS,
+                verbose=1,
+                validation_split=0.1,
+                batch_size=config.BATCH_SIZE)
 
+GoNeuralNet.save_model(0.1)
 # input = keras.Input(shape=(19, 19, planes), name='board')
 # x = layers.Conv2D(32, 3, activation='relu', padding='same')(input)
 # x = layers.Conv2D(32, 3, activation='relu', padding='same')(x)

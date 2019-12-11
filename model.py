@@ -1,6 +1,6 @@
 from tensorflow.keras.models import Sequential, Model
 from tensorflow.keras.layers import Input, Dense, Conv2D, Flatten, BatchNormalization, Activation, LeakyReLU, add
-from tensorflow.keras.optimizers import SGD
+from tensorflow.keras.optimizers import SGD, Adam
 from tensorflow.keras import regularizers
 from tensorflow.keras.utils import plot_model
 from tensorflow.keras.callbacks import ModelCheckpoint
@@ -161,15 +161,26 @@ class NeuralNet(GoModel):
         policy_head = self.policy_head(x)
 
         model = Model(inputs=[mainInput], outputs=[policy_head, value_head])
-        model.compile(optimizer=SGD(lr=self.learningRate),
+        model.compile(optimizer=Adam(learning_rate=self.learningRate),
                       loss={
                           'value': 'mse',
                           'policy': 'categorical_crossentropy'
                       },
                       loss_weights={
-                          'value': 1,
-                          'policy': 1
+                          'value': 0.5,
+                          'policy': 0.5
                       },
                       metrics=['accuracy'])
+
+        # model.compile(optimizer=SGD(lr=self.learningRate, momentum=self.momentum)
+        #               loss={
+        #                   'value': 'mse',
+        #                   'policy': 'categorical_crossentropy'
+        #               },
+        #               loss_weights={
+        #                   'value': 0.5,
+        #                   'policy': 0.5
+        #               },
+        #               metrics=['accuracy'])
 
         return model
