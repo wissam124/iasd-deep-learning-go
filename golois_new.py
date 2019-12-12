@@ -48,6 +48,33 @@ GoNeuralNet.fit(input_data, {
                 batch_size=config.BATCH_SIZE)
 
 GoNeuralNet.save_model(0.1)
+
+import pandas as pd
+df = pd.read_csv('./training.log')
+epochs = df['epoch']
+plt.clf()
+f, ax = plt.subplots(2, 3)
+ax[0][0].plot(epochs, df['loss'])
+ax[0][0].plot(epochs, df['val_loss'])
+ax[0][0].legend(['loss', 'val_los'])
+ax[0][0].set_title('Total loss')
+ax[0][1].plot(epochs, df['policy_loss'])
+ax[0][1].plot(epochs, df['val_policy_loss'])
+ax[0][1].legend(['policy_loss', 'val_policy_loss'])
+ax[0][1].set_title('Policy loss')
+ax[0][2].plot(epochs, df['value_loss'])
+ax[0][2].plot(epochs, df['val_value_loss'])
+ax[0][2].legend(['value_loss', 'val_value_loss'])
+ax[0][2].set_title('Value loss')
+ax[1][1].plot(epochs, df['policy_accuracy'])
+ax[1][1].plot(epochs, df['val_policy_accuracy'])
+ax[1][1].legend(['policy_accuracy', 'val_policy_accuracy'])
+ax[1][1].set_title('Policy accuracy')
+ax[1][2].plot(epochs, df['value_accuracy'])
+ax[1][2].plot(epochs, df['val_value_accuracy'])
+ax[1][2].legend(['value_accuracy', 'val_value_accuracy'])
+ax[1][2].set_title('Value accuarcy')
+
 # input = keras.Input(shape=(19, 19, planes), name='board')
 # x = layers.Conv2D(32, 3, activation='relu', padding='same')(input)
 # x = layers.Conv2D(32, 3, activation='relu', padding='same')(x)

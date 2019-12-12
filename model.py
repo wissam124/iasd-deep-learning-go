@@ -36,9 +36,9 @@ class GoModel():
                               batch_size=batch_size,
                               callbacks=[checkpoint, csv_logger])
 
-    def save_model(self, version):
-        self.model.save('./model_params_version_' + "{}".format(version) +
-                        '.h5')
+    def save_model(self):
+        self.model.save('./model_' + str(len(hiddenLayers)) + 'layers_' +
+                        str(self.regParam) + 'reg' + '.h5')
 
     def summary(self):
         return self.model.summary()
