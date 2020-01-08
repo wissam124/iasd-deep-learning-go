@@ -1,11 +1,15 @@
+import tensorflow as tf
+import tensorflow.keras as keras
 from tensorflow.keras.models import Sequential, Model
-from tensorflow.keras.layers import Input, Dense, Conv2D, Flatten, BatchNormalization, Activation, LeakyReLU, add
-from tensorflow.keras.optimizers import SGD, Adam
+from tensorflow.keras.layers import Input, Dense, Conv2D, Flatten, BatchNormalization, Activation, LeakyReLU, add, SpatialDropout2D, ReLU, Softmax, MaxPool2D, Dropout
+from tensorflow.keras.optimizers import SGD, Adam, Adadelta
 from tensorflow.keras import regularizers
 from tensorflow.keras.utils import plot_model
-from tensorflow.keras.callbacks import ModelCheckpoint
-from tensorflow.keras.callbacks import CSVLogger
+from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger, EarlyStopping, ReduceLROnPlateau
+
 from matplotlib import pyplot as plt
+import numpy as np
+import golois
 
 
 class GoModel():
@@ -19,12 +23,13 @@ class GoModel():
         return self.model.predict(x)
 
     def fit(self, X, y, epochs, verbose, validation_split, batch_size):
-        checkpoint = ModelCheckpoint('best_model.h5',
-                                     monitor='loss',
-                                     verbose=1,
-                                     save_best_only=True,
-                                     mode='auto',
-                                     period=1)
+
+        ValCheckpoint = ModelCheckpoint('best_val_loss.h5',
+                                        monitor='val_loss',
+                                        verbose=1,
+                                        save_best_only=True,
+                                        mode='auto',
+                                        period=1)
 
         csv_logger = CSVLogger('training.log', separator=',', append=False)
 
@@ -34,11 +39,10 @@ class GoModel():
                               verbose=verbose,
                               validation_split=validation_split,
                               batch_size=batch_size,
-                              callbacks=[checkpoint, csv_logger])
+                              callbacks=[ValCheckpoint, csv_logger])
 
     def save_model(self):
-        self.model.save('./model_' + str(len(hiddenLayers)) + 'layers_' +
-                        str(self.regParam) + 'reg' + '.h5')
+        self.model.save('./model_' + str(self.regParam) + 'reg' + '.h5')
 
     def summary(self):
         return self.model.summary()
@@ -69,9 +73,11 @@ class NeuralNet(GoModel):
                    activation='linear',
                    kernel_regularizer=regularizers.l2(self.regParam))(x)
 
+        x = SpatialDropout2D(rate=0.5, data_format='channels_last')(x)
+
         x = BatchNormalization(axis=-1)(x)
 
-        x = LeakyReLU()(x)
+        x = LeakyReLU(alpha=0.3)(x)
 
         return x
 
@@ -87,11 +93,13 @@ class NeuralNet(GoModel):
                    activation='linear',
                    kernel_regularizer=regularizers.l2(self.regParam))(x)
 
+        x = SpatialDropout2D(rate=0.5, data_format='channels_last')(x)
+
         x = BatchNormalization(axis=-1)(x)
 
         x = add([inputLayer, x])
 
-        x = LeakyReLU()(x)
+        x = LeakyReLU(alpha=0.3)(x)
 
         return (x)
 
@@ -107,16 +115,18 @@ class NeuralNet(GoModel):
 
         x = BatchNormalization(axis=-1)(x)
 
-        x = LeakyReLU()(x)
+        x = LeakyReLU(alpha=0.3)(x)
 
         x = Flatten()(x)
 
-        x = Dense(10,
+        x = Dense(40,
                   use_bias=False,
                   activation='linear',
                   kernel_regularizer=regularizers.l2(self.regParam))(x)
 
-        x = LeakyReLU()(x)
+        x = LeakyReLU(alpha=0.3)(x)
+
+        # x = Dropout(0.2)(x)
 
         x = Dense(1,
                   use_bias=False,
@@ -138,7 +148,7 @@ class NeuralNet(GoModel):
 
         x = BatchNormalization(axis=-1)(x)
 
-        x = LeakyReLU()(x)
+        x = LeakyReLU(alpha=0.3)(x)
 
         x = Flatten()(x)
 
@@ -161,26 +171,28 @@ class NeuralNet(GoModel):
         policy_head = self.policy_head(x)
 
         model = Model(inputs=[mainInput], outputs=[policy_head, value_head])
-        model.compile(optimizer=Adam(learning_rate=self.learningRate),
-                      loss={
-                          'value': 'mse',
-                          'policy': 'categorical_crossentropy'
-                      },
-                      loss_weights={
-                          'value': 0.5,
-                          'policy': 0.5
-                      },
-                      metrics=['accuracy'])
 
-        # model.compile(optimizer=SGD(lr=self.learningRate, momentum=self.momentum)
+        # model.compile(optimizer=SGD(lr=self.learningRate, momentum=self.momentum),
         #               loss={
         #                   'value': 'mse',
         #                   'policy': 'categorical_crossentropy'
         #               },
         #               loss_weights={
-        #                   'value': 0.5,
-        #                   'policy': 0.5
+        #                   'value': 100,
+        #                   'policy':1
         #               },
         #               metrics=['accuracy'])
+
+        model.compile(optimizer=SGD(lr=self.learningRate,
+                                    momentum=self.momentum),
+                      loss={
+                          'value': 'mse',
+                          'policy': 'categorical_crossentropy'
+                      },
+                      loss_weights={
+                          'value': 1,
+                          'policy': 1
+                      },
+                      metrics=['accuracy'])
 
         return model
